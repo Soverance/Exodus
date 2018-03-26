@@ -3,19 +3,13 @@
 // soverance.com
 // scott.mccutchen@soverance.com
 
-// Exodus Data Management Service by Soverance Studios helps manage data redundancy in hybrid on-prem + cloud environments.  
-// Efficiently process automatic redundant backups of Hyper-V infrastructure and file shares to both local and Azure storage.
-
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Linq;
 using System.ServiceProcess;
-using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.IO;
+using System.Xml;
+using Exodus.HyperV;
 
 namespace Exodus
 {
@@ -69,7 +63,7 @@ namespace Exodus
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
 
             // write a log entry to record service start
-            ExodusEventLog.WriteEntry("The Exodus Data Management Service has started.", EventLogEntryType.Information, 1);
+            ExodusEventLog.WriteEntry("The Exodus Data Management Service has started.", EventLogEntryType.Information, 01);
 
             // Set up a timer to trigger every minute.  
             System.Timers.Timer timer = new System.Timers.Timer();
@@ -80,6 +74,17 @@ namespace Exodus
             // Update the service state to Running.  
             serviceStatus.dwCurrentState = ServiceState.SERVICE_RUNNING;
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
+            
+            string xmlFile = File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExodusConfig.xml"));
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xmlFile);
+            string host = doc.SelectSingleNode("HyperV/HostToQuery").InnerText;
+            string user = doc.SelectSingleNode("HyperV/AdminUser").InnerText;
+            string pass = doc.SelectSingleNode("HyperV/AdminPass").InnerText;
+            string domain = doc.SelectSingleNode("HyperV/Domain").InnerText;
+
+            ExodusManager_HyperV Manager_HyperV = new ExodusManager_HyperV();
+            Manager_HyperV.QueryInstance(host, "SELECT * FROM Msvm_ComputerSystem", user, pass, domain);
         }
 
         protected override void OnStop()
@@ -91,7 +96,7 @@ namespace Exodus
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
 
             // write a log entry to record service stop
-            ExodusEventLog.WriteEntry("The Exodus Data Management Service has stopped.", EventLogEntryType.Information, 0);
+            ExodusEventLog.WriteEntry("The Exodus Data Management Service has stopped.", EventLogEntryType.Information, 00);
 
             // Update the service state to Stopped.  
             serviceStatus.dwCurrentState = ServiceState.SERVICE_STOPPED;

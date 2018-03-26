@@ -49,6 +49,6 @@ namespace Exodus
 
         #endregion
 
-        private System.Diagnostics.EventLog ExodusEventLog;
+        public System.Diagnostics.EventLog ExodusEventLog;
     }
 }

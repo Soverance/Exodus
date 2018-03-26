@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ExodusConfig>
+  <HyperV>
+    <HostToQuery>hypervhost</HostToQuery>
+    <AdminUser>adminuser</AdminUser>
+    <AdminPass>adminpassword</AdminPass>
+    <Domain>ntlmdomain:contoso.com</Domain>
+  </HyperV>
+</ExodusConfig>
