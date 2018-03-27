@@ -17,7 +17,13 @@ installutil.exe Exodus.exe
 ```
 
 ### Release Builds:
-Coming Soon...
+You can install the service on any computer by simply opening an administrative Powershell session, navigating to the "C:\Windows\Microsoft.NET\Framework\v4.0.30319\" directory, and then running the following command:
+
+```
+./installutil.exe "C:\Exodus\Exodus.exe"
+```
+
+where "C:\Exodus\Exodus.exe" is wherever you copied the release files to.
 
 ## Starting and Stopping the Exodus Service
 Once the service has been installed, you can simply use the "net start Exodus" or "net stop Exodus" commands to start and stop the service.  Alternatively, control the service via GUI with the "Services" MMC snap-in by typing "services.msc" into the Run command window.
@@ -31,7 +37,13 @@ installutil.exe /u Exodus.exe
 ```
 
 ### Release Builds:
-Coming Soon...
+You can uninstall the service on any computer by simply opening an administrative Powershell session, navigating to the "C:\Windows\Microsoft.NET\Framework\v4.0.30319\" directory, and then running the following command:
+
+```
+./installutil.exe /u "C:\Exodus\Exodus.exe"
+```
+
+where "C:\Exodus\Exodus.exe" is wherever you copied the release files to.
 
 ## Exodus Event Log Event IDs
 * 00   - Exodus Service has stopped.

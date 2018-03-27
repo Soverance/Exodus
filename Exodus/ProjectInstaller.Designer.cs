@@ -34,7 +34,7 @@
             // 
             // ExodusServiceProcessInstaller
             // 
-            this.ExodusServiceProcessInstaller.Account = System.ServiceProcess.ServiceAccount.LocalSystem;
+            this.ExodusServiceProcessInstaller.Account = System.ServiceProcess.ServiceAccount.LocalService;
             this.ExodusServiceProcessInstaller.Password = null;
             this.ExodusServiceProcessInstaller.Username = null;
             // 
