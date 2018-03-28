@@ -63,7 +63,7 @@ namespace Exodus
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
 
             // write a log entry to record service start
-            ExodusEventLog.WriteEntry("The Exodus Data Management Service has started.", EventLogEntryType.Information, 01);
+            ExodusEventLog.WriteEntry("The Exodus Data Management Service has started.", EventLogEntryType.Information, 101);
 
             // Set up a timer to trigger every minute.  
             System.Timers.Timer timer = new System.Timers.Timer();
@@ -75,16 +75,29 @@ namespace Exodus
             serviceStatus.dwCurrentState = ServiceState.SERVICE_RUNNING;
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
             
-            string xmlFile = File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExodusConfig.xml"));
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(xmlFile);
-            string host = doc.SelectSingleNode("HyperV/HostToQuery").InnerText;
-            string user = doc.SelectSingleNode("HyperV/AdminUser").InnerText;
-            string pass = doc.SelectSingleNode("HyperV/AdminPass").InnerText;
-            string domain = doc.SelectSingleNode("HyperV/Domain").InnerText;
+            try
+            {
+                string xmlFile = File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExodusConfig.xml"));
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(xmlFile);
+                string host = doc.SelectSingleNode("ExodusConfig/HyperV/HostToQuery").InnerText;
+                //ExodusEventLog.WriteEntry("host: " + host, EventLogEntryType.Information, 178);
+                string user = doc.SelectSingleNode("ExodusConfig/HyperV/AdminUser").InnerText;
+                //ExodusEventLog.WriteEntry("user: " + user, EventLogEntryType.Information, 178);
+                string pass = doc.SelectSingleNode("ExodusConfig/HyperV/AdminPass").InnerText;
+                //ExodusEventLog.WriteEntry("pass: " + pass, EventLogEntryType.Information, 178);
+                string domain = doc.SelectSingleNode("ExodusConfig/HyperV/Domain").InnerText;
+                //ExodusEventLog.WriteEntry("domain: " + domain, EventLogEntryType.Information, 178);
 
-            ExodusManager_HyperV Manager_HyperV = new ExodusManager_HyperV();
-            Manager_HyperV.QueryInstance(host, "SELECT * FROM Msvm_ComputerSystem", user, pass, domain);
+                ExodusManager_HyperV Manager_HyperV = new ExodusManager_HyperV();
+                Manager_HyperV.QueryInstance(host, "SELECT * FROM Msvm_ComputerSystem", user, pass, domain);
+            }
+            catch (Exception ex)
+            {
+                // write errors to the log
+                ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 177);
+            }
+            
         }
 
         protected override void OnStop()
@@ -96,7 +109,7 @@ namespace Exodus
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
 
             // write a log entry to record service stop
-            ExodusEventLog.WriteEntry("The Exodus Data Management Service has stopped.", EventLogEntryType.Information, 00);
+            ExodusEventLog.WriteEntry("The Exodus Data Management Service has stopped.", EventLogEntryType.Information, 100);
 
             // Update the service state to Stopped.  
             serviceStatus.dwCurrentState = ServiceState.SERVICE_STOPPED;
@@ -106,7 +119,7 @@ namespace Exodus
         public void OnTimer(object sender, System.Timers.ElapsedEventArgs args)
         {
             // TODO: Insert monitoring activities here.  
-            ExodusEventLog.WriteEntry("Exodus is monitoring the system...", EventLogEntryType.Information, 99);
+            ExodusEventLog.WriteEntry("Exodus is monitoring the system...", EventLogEntryType.Information, 999);
         }
 
         private void ExodusEventLog_EntryWritten(object sender, EntryWrittenEventArgs e)

@@ -38,7 +38,7 @@ namespace Exodus.HyperV
             {
                 // Handle the exception as appropriate.
                 Exodus ExodusRoot = new Exodus();
-                ExodusRoot.ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Information, 201);
+                ExodusRoot.ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 201);
             }
         }
     }
