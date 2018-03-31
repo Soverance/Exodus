@@ -15,6 +15,8 @@ namespace Exodus
 {
     public partial class Exodus : ServiceBase
     {
+        bool b_BackupHasStarted = false;
+
         public Exodus()
         {
             InitializeComponent();
@@ -74,31 +76,7 @@ namespace Exodus
             // Update the service state to Running.  
             serviceStatus.dwCurrentState = ServiceState.SERVICE_RUNNING;
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
-            
-            try
-            {
-                string xmlFile = File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExodusConfig.xml"));
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(xmlFile);
-                string host = doc.SelectSingleNode("ExodusConfig/HyperV/HostToQuery").InnerText;
-                //ExodusEventLog.WriteEntry("host: " + host, EventLogEntryType.Information, 178);
-                string user = doc.SelectSingleNode("ExodusConfig/HyperV/AdminUser").InnerText;
-                //ExodusEventLog.WriteEntry("user: " + user, EventLogEntryType.Information, 178);
-                string pass = doc.SelectSingleNode("ExodusConfig/HyperV/AdminPass").InnerText;
-                //ExodusEventLog.WriteEntry("pass: " + pass, EventLogEntryType.Information, 178);
-                string domain = doc.SelectSingleNode("ExodusConfig/HyperV/Domain").InnerText;
-                //ExodusEventLog.WriteEntry("domain: " + domain, EventLogEntryType.Information, 178);
-
-                ExodusManager_HyperV Manager_HyperV = new ExodusManager_HyperV();
-                Manager_HyperV.QueryInstance(host, "SELECT * FROM Msvm_ComputerSystem", user, pass, domain);
-            }
-            catch (Exception ex)
-            {
-                // write errors to the log
-                ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 177);
-            }
-            
-        }
+        }        
 
         protected override void OnStop()
         {
@@ -117,9 +95,46 @@ namespace Exodus
         }
 
         public void OnTimer(object sender, System.Timers.ElapsedEventArgs args)
-        {
-            // TODO: Insert monitoring activities here.  
+        { 
             ExodusEventLog.WriteEntry("Exodus is monitoring the system...", EventLogEntryType.Information, 999);
+
+            // only start if the backup process has not yet been initiated
+            if (!b_BackupHasStarted)
+            {
+                try
+                {
+                    b_BackupHasStarted = true;
+
+                    string xmlFile = File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExodusConfig.xml"));
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(xmlFile);
+
+                    string host = doc.SelectSingleNode("ExodusConfig/HyperV/HostToQuery").InnerText;
+                    //ExodusEventLog.WriteEntry("host: " + host, EventLogEntryType.Information, 178);
+                    string backupdir = doc.SelectSingleNode("ExodusConfig/HyperV/BackupDestination").InnerText;
+                    //ExodusEventLog.WriteEntry("host: " + host, EventLogEntryType.Information, 178);
+                    int retain = Int32.Parse(doc.SelectSingleNode("ExodusConfig/HyperV/BackupsToRetain").InnerText);
+                    //ExodusEventLog.WriteEntry("backups to retain: " + retain.ToString(), EventLogEntryType.Information, 178);
+                    string user = doc.SelectSingleNode("ExodusConfig/HyperV/AdminUser").InnerText;
+                    //ExodusEventLog.WriteEntry("user: " + user, EventLogEntryType.Information, 178);
+                    string pass = doc.SelectSingleNode("ExodusConfig/HyperV/AdminPass").InnerText;
+                    //ExodusEventLog.WriteEntry("pass: " + pass, EventLogEntryType.Information, 178);
+                    string domain = doc.SelectSingleNode("ExodusConfig/HyperV/Domain").InnerText;
+                    //ExodusEventLog.WriteEntry("domain: " + domain, EventLogEntryType.Information, 178);
+
+                    ExodusManager_HyperV Manager_HyperV = new ExodusManager_HyperV();
+                    //Manager_HyperV.QueryInstance(host, "SELECT * FROM Msvm_ComputerSystem", user, pass, domain);
+                    //Manager_HyperV.BackupHost(host, backupdir);
+                    Manager_HyperV.DelegateAccount(host, backupdir);
+                    Manager_HyperV.ManageBackupDirectory(backupdir, retain);
+                    Manager_HyperV.GetAllVMs(host, backupdir);                    
+                }
+                catch (Exception ex)
+                {
+                    // write errors to the log
+                    ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 177);
+                }
+            }
         }
 
         private void ExodusEventLog_EntryWritten(object sender, EntryWrittenEventArgs e)

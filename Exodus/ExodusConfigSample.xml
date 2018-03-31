@@ -2,8 +2,10 @@
 <ExodusConfig>
   <HyperV>
     <HostToQuery>hypervhost</HostToQuery>
+    <BackupDestination>\\remotecomputer\archive\Hyper-V</BackupDestination>
+    <BackupsToRetain>5</BackupsToRetain>
     <AdminUser>adminuser</AdminUser>
     <AdminPass>adminpassword</AdminPass>
-    <Domain>ntlmdomain:contoso.com</Domain>
+    <Domain>contoso.com</Domain>
   </HyperV>
 </ExodusConfig>

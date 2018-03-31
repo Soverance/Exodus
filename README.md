@@ -3,6 +3,17 @@
 Exodus Data Management Service by Soverance Studios helps manage data redundancy in hybrid on-prem + cloud environments. 
 Efficiently process automatic redundant backups of Hyper-V infrastructure and file shares to both local and Azure storage.
 
+## Prerequisites
+* A Hyper-V host as a member of an Active Directory domain
+* A server on which to install the Exodus service (it cannot be installed on the Hyper-V host)
+* Microsoft .NET 4.6 or better
+* Microsoft Hyper-V Module for Windows PowerShell
+* Microsoft Active Directory Module for Windows PowerShell
+
+## Configure Network Environment
+* Enable WinRM on all machines that will interact with the Exodus service.  The preferred method is to do this via Group Policy within an Active Directory domain.
+* If backing up to a network share, be sure to grant Full Control permissions over the share to the computer accounts which will interact with the share.
+
 ## Configure ExodusConfig.xml
 You must make a copy of the "ExodusConfigSample.xml" file, and rename it to "ExodusConfig.xml"  In the new ExodusConfig.xml file, modify the entries to reflect the configuration for your specific environment.  
 
@@ -50,7 +61,15 @@ These Event IDs will appear in the Event Viewer under the "Exodus Event Log".
 
 * 100 - Exodus Service has stopped
 * 101 - Exodus Service has started
-* 999 - Exodus Service is monitoring the system
 * 177 - ExodusConfig.xml XML Load Error
-* 200 - Hyper-V Management Query Machine Found (hostname)
-* 201 - Hyper-V Management Query Exception Message
+* 178 - ExodusConfig.xml XML Value Output
+* 200 - Hyper-V Management WQL Machine Found (hostname)
+* 201 - Hyper-V PowerShell Backup Information
+* 202 - Hyper-V Backup Directory Management Information
+* 298 - Hyper-V PowerShell Error Stream
+* 299 - Hyper-V Management Exception
+* 624 - PowerShell VM Backup Incomplete
+* 625 - PowerShell VM Backup Progress
+* 626 - PowerShell VM Backup Complete
+* 675 - Resource-Based Constrained Delegation Information
+* 999 - Monitoring Notification
