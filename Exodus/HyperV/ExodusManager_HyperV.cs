@@ -97,7 +97,8 @@ namespace Exodus.HyperV
                 Exodus ExodusRoot = new Exodus();
 
                 // configure a dated directory path
-                string datepath = path + DateTime.Today.ToString("yyyyMMdd");
+                // this needs to be refactored, but if you change this datetime value, you must also change the value of this same string in BackupVM()
+                string datepath = path + DateTime.Today.ToString("yyyy.MM.dd.hh.mm.ss");
 
                 // create the directory for today's backup
                 // this method does nothing if the directory already exists.
@@ -105,7 +106,7 @@ namespace Exodus.HyperV
                 string message0 = "The backup directory " + datepath + " was created.";
                 ExodusRoot.ExodusEventLog.WriteEntry(message0, EventLogEntryType.Information, 201);
 
-                // if there are more than 5 
+                // if there are more backup directories than specified
                 if (System.IO.Directory.GetDirectories(@path).Length > retain)
                 {
                     string message1 = System.IO.Directory.GetDirectories(@path).Length.ToString() + " directories were found, which is greater than the retention count specified in ExodusConfig.xml.  Deleting oldest backup directory.";
@@ -114,7 +115,7 @@ namespace Exodus.HyperV
                     // this code gets all the directories in the specified remote path, orders them youngest first, skips the specified retain count, and deletes everything else
                     foreach (var fi in new DirectoryInfo(path).GetDirectories().OrderByDescending(x => x.LastWriteTime).Skip(retain))
                     {
-                        fi.Delete();
+                        fi.Delete(true);  // recursively delete the directory
                         string message2 = fi.FullName + " was deleted.";
                         ExodusRoot.ExodusEventLog.WriteEntry(message2, EventLogEntryType.Information, 201);
                     }
@@ -183,7 +184,8 @@ namespace Exodus.HyperV
                 Exodus ExodusRoot = new Exodus();
 
                 // configure a dated directory path
-                string datepath = path + DateTime.Today.ToString("yyyyMMdd");
+                // this needs to be refactored, but if you change this datetime value, you must also change the value of this same string in ManageBackupDirectory()
+                string datepath = path + DateTime.Today.ToString("yyyy.MM.dd.hh.mm.ss");
 
                 // create a new PS instance
                 using (PowerShell PowerShellInstance = PowerShell.Create())
