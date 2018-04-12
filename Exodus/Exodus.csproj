@@ -88,6 +88,7 @@
     <Compile Include="Exodus.Designer.cs">
       <DependentUpon>Exodus.cs</DependentUpon>
     </Compile>
+    <Compile Include="Files\ExodusManager_Files.cs" />
     <Compile Include="HyperV\ExodusManager_HyperV.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProjectInstaller.cs">
@@ -138,5 +139,6 @@
     </Content>
     <Content Include="ExodusConfigSample.xml" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

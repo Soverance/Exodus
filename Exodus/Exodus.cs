@@ -15,7 +15,11 @@ namespace Exodus
 {
     public partial class Exodus : ServiceBase
     {
+        // a flag to determine whether or not the backup process has already begun
         bool b_BackupHasStarted = false;
+
+        // configure a timestamp of when the service started, to be appended as the backup directory path        
+        public static string startTimeStamp; 
 
         public Exodus()
         {
@@ -58,6 +62,9 @@ namespace Exodus
 
         protected override void OnStart(string[] args)
         {
+            // see here for configuring DateTime formats:  https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
+            startTimeStamp = DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss");
+
             // Update the service state to Start Pending.  
             ServiceStatus serviceStatus = new ServiceStatus();
             serviceStatus.dwCurrentState = ServiceState.SERVICE_START_PENDING;
@@ -96,7 +103,8 @@ namespace Exodus
 
         public void OnTimer(object sender, System.Timers.ElapsedEventArgs args)
         { 
-            ExodusEventLog.WriteEntry("Exodus is monitoring the system...", EventLogEntryType.Information, 999);
+            // Write this entry to the log just to verify that the service is actually doing something...
+            //ExodusEventLog.WriteEntry("Exodus is monitoring the system...", EventLogEntryType.Information, 999);
 
             // only start if the backup process has not yet been initiated
             if (!b_BackupHasStarted)

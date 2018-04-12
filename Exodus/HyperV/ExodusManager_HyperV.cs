@@ -97,8 +97,7 @@ namespace Exodus.HyperV
                 Exodus ExodusRoot = new Exodus();
 
                 // configure a dated directory path
-                // this needs to be refactored, but if you change this datetime value, you must also change the value of this same string in BackupVM()
-                string datepath = path + DateTime.Today.ToString("yyyy.MM.dd.hh.mm.ss");
+                string datepath = path + Exodus.startTimeStamp;
 
                 // create the directory for today's backup
                 // this method does nothing if the directory already exists.
@@ -184,8 +183,7 @@ namespace Exodus.HyperV
                 Exodus ExodusRoot = new Exodus();
 
                 // configure a dated directory path
-                // this needs to be refactored, but if you change this datetime value, you must also change the value of this same string in ManageBackupDirectory()
-                string datepath = path + DateTime.Today.ToString("yyyy.MM.dd.hh.mm.ss");
+                string datepath = path + Exodus.startTimeStamp;
 
                 // create a new PS instance
                 using (PowerShell PowerShellInstance = PowerShell.Create())
