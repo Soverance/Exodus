@@ -17,7 +17,7 @@ Efficiently process automatic redundant backups of Hyper-V infrastructure and fi
 ## Configure ExodusConfig.xml
 You must make a copy of the "ExodusConfigSample.xml" file, and rename it to "ExodusConfig.xml"  In the new ExodusConfig.xml file, modify the entries to reflect the configuration for your specific environment.  
 
-The "ExodusConfig.xml" file must be present with the installation before this service will run.  In the Solution Explorer, right-click the "ExodusConfig.xml" file and select "Properties", then set the value of the "Copy to Output Directory" attribute to "Copy Always".
+When building this project in Visual Studio, know that the "ExodusConfig.xml" file must be present with the installation before this service will run.  In the Solution Explorer, right-click the "ExodusConfig.xml" file and select "Properties", then set the value of the "Copy to Output Directory" attribute to "Copy Always".
 
 ## Installing the Exodus Service
 ### Development builds: 
@@ -28,7 +28,7 @@ installutil.exe Exodus.exe
 ```
 
 ### Release Builds:
-The Exodus service is not designed to be installed directly on a Hyper-V host.  Instead,  you must install the service on a remote computer (ideally a dedicated backup server). You can install the service by simply opening an administrative Powershell session, navigating to the "C:\Windows\Microsoft.NET\Framework\v4.0.30319\" directory, and then running the following command:
+The Exodus service is not designed to be installed directly on a Hyper-V host.  Instead, you must install the service on a remote computer (ideally a dedicated backup server). You can install the service by simply opening an administrative Powershell session, navigating to the "C:\Windows\Microsoft.NET\Framework\v4.0.30319\" directory, and then running the following command:
 
 ```
 ./installutil.exe "C:\Exodus\Exodus.exe"
@@ -57,19 +57,24 @@ You can uninstall the service on any computer by simply opening an administrativ
 where "C:\Exodus\Exodus.exe" is wherever you copied the release files to.
 
 ## Exodus Event Log Event IDs
-These Event IDs will appear in the Event Viewer under the "Exodus Event Log".
+The following Event IDs will appear in the Event Viewer under the "Exodus Event Log" when the associated event occurs.
 
-* 100 - Exodus Service has stopped
-* 101 - Exodus Service has started
-* 177 - ExodusConfig.xml XML Load Error
-* 178 - ExodusConfig.xml XML Value Output
-* 200 - Hyper-V Management WQL Machine Found (hostname)
-* 201 - Hyper-V PowerShell Backup Information
-* 202 - Hyper-V Backup Directory Management Information
-* 298 - Hyper-V PowerShell Error Stream
-* 299 - Hyper-V Management Exception
-* 624 - PowerShell VM Backup Incomplete
-* 625 - PowerShell VM Backup Progress
-* 626 - PowerShell VM Backup Complete
-* 675 - Resource-Based Constrained Delegation Information
-* 999 - Monitoring Notification
+* 100 - INFORMATION - Exodus Service has stopped
+* 101 - INFORMATION - Exodus Service has started
+* 130 - WARNING - Exodus Feature Disabled Notification
+* 177 - ERROR - ExodusConfig.xml XML Load Error
+* 178 - INFORMATION - ExodusConfig.xml XML Value Output
+* 200 - INFORMATION - Hyper-V Management WQL Output
+* 201 - INFORMATION - Hyper-V Management Information
+* 298 - ERROR - Hyper-V PowerShell Error Stream
+* 299 - ERROR - Hyper-V Management Exception
+* 301 - INFORMATION - Files Management Information
+* 302 - INFORMATION - Files RoboCopy Output
+* 398 - ERROR - Files PowerShell Error Stream
+* 399 - ERROR - Files Management Exception
+* 624 - ERROR - PowerShell VM Backup Incomplete
+* 625 - INFORMATION - PowerShell VM Backup Progress
+* 626 - INFORMATION - PowerShell VM Backup Complete
+* 675 - INFORMATION - Resource-Based Constrained Delegation Information
+* 725 - INFORMATION - PowerShell RoboCopy Process
+* 999 - INFORMATION - Monitoring Notification

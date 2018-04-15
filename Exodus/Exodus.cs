@@ -10,13 +10,15 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Xml;
 using Exodus.HyperV;
+using Exodus.Files;
 
 namespace Exodus
 {
     public partial class Exodus : ServiceBase
     {
-        // a flag to determine whether or not the backup process has already begun
-        bool b_BackupHasStarted = false;
+        // flags to determine whether or not the backup processes have already begun
+        bool b_HyperVHasStarted = false;
+        bool b_FilesHasStarted = false;
 
         // configure a timestamp of when the service started, to be appended as the backup directory path        
         public static string startTimeStamp; 
@@ -106,21 +108,23 @@ namespace Exodus
             // Write this entry to the log just to verify that the service is actually doing something...
             //ExodusEventLog.WriteEntry("Exodus is monitoring the system...", EventLogEntryType.Information, 999);
 
-            // only start if the backup process has not yet been initiated
-            if (!b_BackupHasStarted)
+            // only start if the Hyper-V backup process has not yet been initiated
+            if (!b_HyperVHasStarted)
             {
                 try
                 {
-                    b_BackupHasStarted = true;
+                    b_HyperVHasStarted = true;
 
                     string xmlFile = File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExodusConfig.xml"));
                     XmlDocument doc = new XmlDocument();
                     doc.LoadXml(xmlFile);
 
+                    bool b_ExportAll = Convert.ToBoolean(doc.SelectSingleNode("ExodusConfig/HyperV/ExportAll").InnerText);
+                    //ExodusEventLog.WriteEntry("b_ExportAll: " + b_ExportAll.ToString(), EventLogEntryType.Information, 178);
                     string host = doc.SelectSingleNode("ExodusConfig/HyperV/HostToQuery").InnerText;
                     //ExodusEventLog.WriteEntry("host: " + host, EventLogEntryType.Information, 178);
                     string backupdir = doc.SelectSingleNode("ExodusConfig/HyperV/BackupDestination").InnerText;
-                    //ExodusEventLog.WriteEntry("host: " + host, EventLogEntryType.Information, 178);
+                    //ExodusEventLog.WriteEntry("backupdir: " + backupdir, EventLogEntryType.Information, 178);
                     int retain = Int32.Parse(doc.SelectSingleNode("ExodusConfig/HyperV/BackupsToRetain").InnerText);
                     //ExodusEventLog.WriteEntry("backups to retain: " + retain.ToString(), EventLogEntryType.Information, 178);
                     string user = doc.SelectSingleNode("ExodusConfig/HyperV/AdminUser").InnerText;
@@ -130,12 +134,53 @@ namespace Exodus
                     string domain = doc.SelectSingleNode("ExodusConfig/HyperV/Domain").InnerText;
                     //ExodusEventLog.WriteEntry("domain: " + domain, EventLogEntryType.Information, 178);
 
-                    ExodusManager_HyperV Manager_HyperV = new ExodusManager_HyperV();
-                    //Manager_HyperV.QueryInstance(host, "SELECT * FROM Msvm_ComputerSystem", user, pass, domain);
-                    //Manager_HyperV.BackupHost(host, backupdir);
-                    Manager_HyperV.DelegateAccount(host, backupdir);
-                    Manager_HyperV.ManageBackupDirectory(backupdir, retain);
-                    Manager_HyperV.GetAllVMs(host, backupdir);                    
+                    if (b_ExportAll)
+                    {
+                        ExodusManager_HyperV Manager_HyperV = new ExodusManager_HyperV();
+                        //Manager_HyperV.QueryInstance(host, "SELECT * FROM Msvm_ComputerSystem", user, pass, domain);
+                        //Manager_HyperV.BackupHost(host, backupdir);
+                        Manager_HyperV.DelegateAccount(host, backupdir);
+                        Manager_HyperV.ManageBackupDirectory(backupdir, retain);
+                        Manager_HyperV.GetAllVMs(host, backupdir);
+                    }
+                    else
+                    {
+                        ExodusEventLog.WriteEntry("Hyper-V Export Feature Disabled", EventLogEntryType.Warning, 130);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // write errors to the log
+                    ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 177);
+                }
+            }
+            // only start if the Files backup process has not yet been initiated
+            if (!b_FilesHasStarted)
+            {
+                try
+                {
+                    b_FilesHasStarted = true;
+
+                    string xmlFile = File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExodusConfig.xml"));
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(xmlFile);
+
+                    bool b_EnableMirror = Convert.ToBoolean(doc.SelectSingleNode("ExodusConfig/Files/EnableMirror").InnerText);
+                    //ExodusEventLog.WriteEntry("b_EnableMirror: " + b_EnableMirror.ToString(), EventLogEntryType.Information, 178);
+                    string source = doc.SelectSingleNode("ExodusConfig/Files/Source").InnerText;
+                    //ExodusEventLog.WriteEntry("source: " + source, EventLogEntryType.Information, 178);
+                    string destination = doc.SelectSingleNode("ExodusConfig/Files/Destination").InnerText;
+                    //ExodusEventLog.WriteEntry("destination: " + destination, EventLogEntryType.Information, 178);
+
+                    if (b_EnableMirror)
+                    {
+                        ExodusManager_Files Manager_Files = new ExodusManager_Files();
+                        Manager_Files.MirrorFileShare(source, destination);
+                    }
+                    else
+                    {
+                        ExodusEventLog.WriteEntry("File Share Mirror Feature Disabled", EventLogEntryType.Warning, 130);
+                    }
                 }
                 catch (Exception ex)
                 {

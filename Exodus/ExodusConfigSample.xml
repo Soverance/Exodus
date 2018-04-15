@@ -1,6 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ExodusConfig>
+  <Files>
+    <EnableMirror>true</EnableMirror>
+    <Source>\\fileserver\Repository</Source>
+    <Destination>\\remotecomputer\archive\Files\Repository</Destination>
+  </Files>
   <HyperV>
+    <ExportAll>true</ExportAll>
     <HostToQuery>hypervhost</HostToQuery>
     <BackupDestination>\\remotecomputer\archive\Hyper-V</BackupDestination>
     <BackupsToRetain>5</BackupsToRetain>

@@ -101,6 +101,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Files\RoboCopyMirror.ps1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="HyperV\BackupAll.ps1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
