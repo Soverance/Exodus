@@ -2,6 +2,11 @@
 ######################
 Exodus/ExodusConfig.xml
 
+# Nu-Get Packages
+######################
+packages
+Exodus/packages.config
+
 # User-specific files
 ######################
 *.suo
@@ -35,3 +40,8 @@ bld/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Logs and databases #
+######################
+*.log
+*.sqlite

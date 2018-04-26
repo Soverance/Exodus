@@ -9,14 +9,16 @@ using System.ServiceProcess;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Xml;
-using Exodus.HyperV;
 using Exodus.Files;
+using Exodus.HyperV;
+using Exodus.IIS;
 
 namespace Exodus
 {
     public partial class Exodus : ServiceBase
     {
-        // flags to determine whether or not the backup processes have already begun
+        // flags to determine whether or not the various processes have already begun
+        bool b_WebConfigHasStarted = false;
         bool b_HyperVHasStarted = false;
         bool b_FilesHasStarted = false;
 
@@ -104,90 +106,118 @@ namespace Exodus
         }
 
         public void OnTimer(object sender, System.Timers.ElapsedEventArgs args)
-        { 
+        {
             // Write this entry to the log just to verify that the service is actually doing something...
             //ExodusEventLog.WriteEntry("Exodus is monitoring the system...", EventLogEntryType.Information, 999);
 
-            // only start if the Hyper-V backup process has not yet been initiated
-            if (!b_HyperVHasStarted)
+            try
             {
-                try
+                string xmlFile = File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExodusConfig.xml"));
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(xmlFile);
+
+                // only start if the Web Config process has not yet been initiated
+                if (!b_WebConfigHasStarted)
                 {
-                    b_HyperVHasStarted = true;
-
-                    string xmlFile = File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExodusConfig.xml"));
-                    XmlDocument doc = new XmlDocument();
-                    doc.LoadXml(xmlFile);
-
-                    bool b_ExportAll = Convert.ToBoolean(doc.SelectSingleNode("ExodusConfig/HyperV/ExportAll").InnerText);
-                    //ExodusEventLog.WriteEntry("b_ExportAll: " + b_ExportAll.ToString(), EventLogEntryType.Information, 178);
-                    string host = doc.SelectSingleNode("ExodusConfig/HyperV/HostToQuery").InnerText;
-                    //ExodusEventLog.WriteEntry("host: " + host, EventLogEntryType.Information, 178);
-                    string backupdir = doc.SelectSingleNode("ExodusConfig/HyperV/BackupDestination").InnerText;
-                    //ExodusEventLog.WriteEntry("backupdir: " + backupdir, EventLogEntryType.Information, 178);
-                    int retain = Int32.Parse(doc.SelectSingleNode("ExodusConfig/HyperV/BackupsToRetain").InnerText);
-                    //ExodusEventLog.WriteEntry("backups to retain: " + retain.ToString(), EventLogEntryType.Information, 178);
-                    string user = doc.SelectSingleNode("ExodusConfig/HyperV/AdminUser").InnerText;
-                    //ExodusEventLog.WriteEntry("user: " + user, EventLogEntryType.Information, 178);
-                    string pass = doc.SelectSingleNode("ExodusConfig/HyperV/AdminPass").InnerText;
-                    //ExodusEventLog.WriteEntry("pass: " + pass, EventLogEntryType.Information, 178);
-                    string domain = doc.SelectSingleNode("ExodusConfig/HyperV/Domain").InnerText;
-                    //ExodusEventLog.WriteEntry("domain: " + domain, EventLogEntryType.Information, 178);
-
-                    if (b_ExportAll)
+                    try
                     {
-                        ExodusManager_HyperV Manager_HyperV = new ExodusManager_HyperV();
-                        //Manager_HyperV.QueryInstance(host, "SELECT * FROM Msvm_ComputerSystem", user, pass, domain);
-                        //Manager_HyperV.BackupHost(host, backupdir);
-                        Manager_HyperV.DelegateAccount(host, backupdir);
-                        Manager_HyperV.ManageBackupDirectory(backupdir, retain);
-                        Manager_HyperV.GetAllVMs(host, backupdir);
+                        b_WebConfigHasStarted = true;
+
+                        string sitename = doc.SelectSingleNode("ExodusConfig/IIS/SiteName").InnerText;
+                        //ExodusEventLog.WriteEntry("sitename: " + host, EventLogEntryType.Information, 178);
+                        string siteaddress = doc.SelectSingleNode("ExodusConfig/IIS/SiteAddress").InnerText;
+                        //ExodusEventLog.WriteEntry("siteaddress: " + host, EventLogEntryType.Information, 178);
+                        string localpath = doc.SelectSingleNode("ExodusConfig/IIS/LocalPath").InnerText;
+                        //ExodusEventLog.WriteEntry("localpath: " + backupdir, EventLogEntryType.Information, 178);
+
+                        ExodusManager_IIS Manager_IIS = new ExodusManager_IIS();
+                        Manager_IIS.AddSite(sitename, siteaddress, localpath);
+                        Manager_IIS.AddApplicationPool("Exodus");
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        ExodusEventLog.WriteEntry("Hyper-V Export Feature Disabled", EventLogEntryType.Warning, 130);
+                        // write errors to the log
+                        ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 177);
                     }
                 }
-                catch (Exception ex)
+                // only start if the Hyper-V backup process has not yet been initiated
+                if (!b_HyperVHasStarted)
                 {
-                    // write errors to the log
-                    ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 177);
+                    try
+                    {
+                        b_HyperVHasStarted = true;
+
+                        bool b_ExportAll = Convert.ToBoolean(doc.SelectSingleNode("ExodusConfig/HyperV/ExportAll").InnerText);
+                        //ExodusEventLog.WriteEntry("b_ExportAll: " + b_ExportAll.ToString(), EventLogEntryType.Information, 178);
+                        string host = doc.SelectSingleNode("ExodusConfig/HyperV/HostToQuery").InnerText;
+                        //ExodusEventLog.WriteEntry("host: " + host, EventLogEntryType.Information, 178);
+                        string backupdir = doc.SelectSingleNode("ExodusConfig/HyperV/BackupDestination").InnerText;
+                        //ExodusEventLog.WriteEntry("backupdir: " + backupdir, EventLogEntryType.Information, 178);
+                        int retain = Int32.Parse(doc.SelectSingleNode("ExodusConfig/HyperV/BackupsToRetain").InnerText);
+                        //ExodusEventLog.WriteEntry("backups to retain: " + retain.ToString(), EventLogEntryType.Information, 178);
+                        string user = doc.SelectSingleNode("ExodusConfig/HyperV/AdminUser").InnerText;
+                        //ExodusEventLog.WriteEntry("user: " + user, EventLogEntryType.Information, 178);
+                        string pass = doc.SelectSingleNode("ExodusConfig/HyperV/AdminPass").InnerText;
+                        //ExodusEventLog.WriteEntry("pass: " + pass, EventLogEntryType.Information, 178);
+                        string domain = doc.SelectSingleNode("ExodusConfig/HyperV/Domain").InnerText;
+                        //ExodusEventLog.WriteEntry("domain: " + domain, EventLogEntryType.Information, 178);
+
+                        if (b_ExportAll)
+                        {
+                            ExodusManager_HyperV Manager_HyperV = new ExodusManager_HyperV();
+                            //Manager_HyperV.QueryInstance(host, "SELECT * FROM Msvm_ComputerSystem", user, pass, domain);
+                            //Manager_HyperV.BackupHost(host, backupdir);
+                            Manager_HyperV.DelegateAccount(host, backupdir);
+                            Manager_HyperV.ManageBackupDirectory(backupdir, retain);
+                            Manager_HyperV.GetAllVMs(host, backupdir);
+                        }
+                        else
+                        {
+                            ExodusEventLog.WriteEntry("Hyper-V Export Feature Disabled", EventLogEntryType.Warning, 130);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // write errors to the log
+                        ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 177);
+                    }
+                }
+                // only start if the Files backup process has not yet been initiated
+                if (!b_FilesHasStarted)
+                {
+                    try
+                    {
+                        b_FilesHasStarted = true;
+
+                        bool b_EnableMirror = Convert.ToBoolean(doc.SelectSingleNode("ExodusConfig/Files/EnableMirror").InnerText);
+                        //ExodusEventLog.WriteEntry("b_EnableMirror: " + b_EnableMirror.ToString(), EventLogEntryType.Information, 178);
+                        string source = doc.SelectSingleNode("ExodusConfig/Files/Source").InnerText;
+                        //ExodusEventLog.WriteEntry("source: " + source, EventLogEntryType.Information, 178);
+                        string destination = doc.SelectSingleNode("ExodusConfig/Files/Destination").InnerText;
+                        //ExodusEventLog.WriteEntry("destination: " + destination, EventLogEntryType.Information, 178);
+
+                        if (b_EnableMirror)
+                        {
+                            ExodusManager_Files Manager_Files = new ExodusManager_Files();
+                            Manager_Files.MirrorFileShare(source, destination);
+                        }
+                        else
+                        {
+                            ExodusEventLog.WriteEntry("File Share Mirror Feature Disabled", EventLogEntryType.Warning, 130);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // write errors to the log
+                        ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 177);
+                    }
                 }
             }
-            // only start if the Files backup process has not yet been initiated
-            if (!b_FilesHasStarted)
+            catch (Exception ex)
             {
-                try
-                {
-                    b_FilesHasStarted = true;
-
-                    string xmlFile = File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExodusConfig.xml"));
-                    XmlDocument doc = new XmlDocument();
-                    doc.LoadXml(xmlFile);
-
-                    bool b_EnableMirror = Convert.ToBoolean(doc.SelectSingleNode("ExodusConfig/Files/EnableMirror").InnerText);
-                    //ExodusEventLog.WriteEntry("b_EnableMirror: " + b_EnableMirror.ToString(), EventLogEntryType.Information, 178);
-                    string source = doc.SelectSingleNode("ExodusConfig/Files/Source").InnerText;
-                    //ExodusEventLog.WriteEntry("source: " + source, EventLogEntryType.Information, 178);
-                    string destination = doc.SelectSingleNode("ExodusConfig/Files/Destination").InnerText;
-                    //ExodusEventLog.WriteEntry("destination: " + destination, EventLogEntryType.Information, 178);
-
-                    if (b_EnableMirror)
-                    {
-                        ExodusManager_Files Manager_Files = new ExodusManager_Files();
-                        Manager_Files.MirrorFileShare(source, destination);
-                    }
-                    else
-                    {
-                        ExodusEventLog.WriteEntry("File Share Mirror Feature Disabled", EventLogEntryType.Warning, 130);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // write errors to the log
-                    ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 177);
-                }
-            }
+                // write errors to the log
+                ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 177);
+            }            
         }
 
         private void ExodusEventLog_EntryWritten(object sender, EntryWrittenEventArgs e)
