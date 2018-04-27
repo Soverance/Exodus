@@ -25,7 +25,7 @@ namespace Exodus.IIS
             {
                 ServerManager serverManager = new ServerManager();  // new IIS Server Manager object
 
-                // Make sure there is at least one site in the IIS Server
+                // Make sure there is at least one site in the IIS Server, probably the IIS "Default Web Site"
                 if (serverManager.Sites != null && serverManager.Sites.Count > 0)
                 {
                     // check to make sure the Exodus site does not already exist
@@ -40,19 +40,24 @@ namespace Exodus.IIS
                         exodusSite.ServerAutoStart = true;  // enable auto-start for the new site
                         serverManager.CommitChanges();  // commit changes to IIS
 
-                        ExodusRoot.ExodusEventLog.WriteEntry("A new IIS site, " + SiteName + ", was created.", EventLogEntryType.Information, 140);
+                        ExodusRoot.ExodusEventLog.WriteEntry("A new IIS site named " + SiteName + " was created.", EventLogEntryType.Information, 140);
+                    }
+                    else
+                    {
+                        // write errors to the log
+                        ExodusRoot.ExodusEventLog.WriteEntry("The " + SiteName + " web site already exists in IIS.", EventLogEntryType.Warning, 148);
                     }
                 }
                 else
                 {
                     // write errors to the log
-                    ExodusRoot.ExodusEventLog.WriteEntry("The Exodus website already exists.", EventLogEntryType.Warning, 148);
+                    ExodusRoot.ExodusEventLog.WriteEntry("At least one site must always exist in IIS. ", EventLogEntryType.Error, 149);
                 }
             }
             catch (Exception ex)
             {
                 // write errors to the log
-                ExodusRoot.ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 149);
+                ExodusRoot.ExodusEventLog.WriteEntry("IIS WEB SITE ERROR: " + ex.Message, EventLogEntryType.Error, 149);
             }
             
         }
@@ -64,7 +69,7 @@ namespace Exodus.IIS
             {
                 ServerManager serverManager = new ServerManager();  // new IIS Server Manager object
 
-                // check to ensure the IIS server has at least one application pool
+                // check to ensure the IIS server has at least one application pool, probably the "DefaultAppPool"
                 if (serverManager.ApplicationPools != null && serverManager.ApplicationPools.Count > 0)
                 {
                     // check to make sure the Exodus application pool does not yet exist
@@ -79,21 +84,24 @@ namespace Exodus.IIS
 
                         ExodusRoot.ExodusEventLog.WriteEntry("The Exodus application pool was created.", EventLogEntryType.Information, 140);
                     }
+                    else
+                    {
+                        ApplicationPool AppPool = serverManager.ApplicationPools[SiteName];  // new IIS App Pool object
+                        AppPool.Recycle();  // recycle the app pool
+                        // write errors to the log
+                        ExodusRoot.ExodusEventLog.WriteEntry("The " + SiteName + " application pool already exists in IIS, and was recycled.", EventLogEntryType.Warning, 148);
+                    }
                 }
                 else
                 {
-                    ApplicationPool AppPool = serverManager.ApplicationPools[SiteName];  // new IIS App Pool object
-                    AppPool.Recycle();  // recycle the app pool
                     // write errors to the log
-                    ExodusRoot.ExodusEventLog.WriteEntry("The Exodus application pool already exists, and was recycled.", EventLogEntryType.Warning, 148);
-                }
-
-                
+                    ExodusRoot.ExodusEventLog.WriteEntry("At least one application pool must always exist in IIS.", EventLogEntryType.Error, 149);
+                }                
             }
             catch (Exception ex)
             {
                 // write errors to the log
-                ExodusRoot.ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 149);
+                ExodusRoot.ExodusEventLog.WriteEntry("APPLICATION POOL ERROR: " + ex.Message, EventLogEntryType.Error, 149);
             }            
         }
     }

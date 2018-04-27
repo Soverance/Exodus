@@ -1,4 +1,4 @@
-# © 2018 Soverance Studios
+# ï¿½ 2018 Soverance Studios
 # Scott McCutchen
 # soverance.com
 # scott.mccutchen@soverance.com
@@ -30,7 +30,6 @@ if ($ExportJob.State -ne "Completed")
 
 if ($ExportJob.State -eq "Completed")
 {
-	$results = Receive-Job -Job $ExportJob
-	$message = $vm + " export job has finished.  RESULTS:\n" + $results 
+	$message = $vm + " export job has finished."
 	Write-EventLog -LogName "Exodus Event Log" -Source "Exodus Source" -EventID 626 -EntryType Information -Message $message
 }
