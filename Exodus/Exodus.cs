@@ -219,7 +219,7 @@ namespace Exodus
                 ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 177);
             }            
         }
-
+                
         private void ExodusEventLog_EntryWritten(object sender, EntryWrittenEventArgs e)
         {
 

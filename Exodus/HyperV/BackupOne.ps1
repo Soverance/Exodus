@@ -24,12 +24,13 @@ while ($ExportJob.State -eq "Running" -or $ExportJob.State -eq "NotStarted")
 
 if ($ExportJob.State -ne "Completed")
 {
-	$message = $vm + " export did not complete.  STATUS: " + $ExportJob.State
+	$message = $vm + " export job did not complete.  STATUS: " + $ExportJob.State
 	Write-EventLog -LogName "Exodus Event Log" -Source "Exodus Source" -EventID 624 -EntryType Error -Message $message
 }
 
 if ($ExportJob.State -eq "Completed")
 {
-	$message = $vm + " export process has finished.  STATUS: " + $ExportJob.State
+	$results = Receive-Job -Job $ExportJob
+	$message = $vm + " export job has finished.  RESULTS:\n" + $results 
 	Write-EventLog -LogName "Exodus Event Log" -Source "Exodus Source" -EventID 626 -EntryType Information -Message $message
 }

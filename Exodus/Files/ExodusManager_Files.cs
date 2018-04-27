@@ -6,6 +6,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Management;
 using System.Management.Automation;
 using System.Diagnostics;
@@ -65,6 +66,23 @@ namespace Exodus.Files
                 Exodus ExodusRoot = new Exodus();
                 ExodusRoot.ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 399);
             }
+        }
+
+        public static void ModifyDirectorySecurity(string FileName, string Account, FileSystemRights Rights, AccessControlType ControlType)
+        {
+            // Create a new DirectoryInfo object.
+            DirectoryInfo dInfo = new DirectoryInfo(FileName);
+
+            // Get a DirectorySecurity object that represents the current security settings.
+            DirectorySecurity dSecurity = dInfo.GetAccessControl();
+
+            // Add the FileSystemAccessRule to the security settings. 
+            dSecurity.AddAccessRule(new FileSystemAccessRule(Account,
+            Rights, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None,
+            ControlType));
+
+            // Set the new access settings.
+            dInfo.SetAccessControl(dSecurity);
         }
     }
 }
