@@ -14,4 +14,9 @@
     <AdminPass>adminpassword</AdminPass>
     <Domain>contoso.com</Domain>
   </HyperV>
+  <IIS>
+    <SiteName>Exodus</SiteName>
+    <SiteAddress>exodus.contoso.com</SiteAddress>
+    <LocalPath>C:\inetpub\wwwroot\exodus</LocalPath>
+  </IIS>
 </ExodusConfig>
