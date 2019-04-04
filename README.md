@@ -11,11 +11,12 @@ Exodus Data Management by Soverance Studios is a Windows Service built with .NET
 
 All documentation has been moved to the wiki:  [Exodus Documentation](https://github.com/Soverance/Exodus/wiki)
 
-The Exodus project was born from my desire to have a backup solution for Soverance data that met the following requirements:
+The Exodus project was born from my desire to have what I call a "**one-touch ad-hoc**" backup process of all our critical data at Soverance Studios. This project would have to meet the following requirements:
 
+* Designed for Small Business - I wanted it to be familiar to install and manage in a Microsoft-based corporate domain network
 * Easy to use - I wanted the backup process to be fully automated and require little effort.
-* Full scope - I wanted the backup process to encompass the entire Soverance environment and all of the critical data contained within.
+* Full scope - I wanted the backup process to encompass the complete environment of the average small business, and all of the critical data contained within.
 * Free and secure - I wanted the backup process to utilize native, built-in methods for moving data around the network in order to minimize cost, improve security, and reduce dependencies on third parties.
-* Open source - I wanted the software to be open source, to provide transparancy, security, and community involvement.
+* Open source - I wanted the software to be open source, in order to provide transparancy, security, and community involvement.
 
 Please feel free to suggest feature updates, improvements, or even submit pull requests!
