@@ -14,7 +14,7 @@ All documentation has been moved to the wiki:  [Exodus Documentation](https://gi
 The Exodus project was born from my desire to have what I call a "**one-touch ad-hoc**" backup process of all our critical data at Soverance Studios. This project would have to meet the following requirements:
 
 * Designed for Small Business - I wanted it to be familiar to install and manage in a Microsoft-based corporate domain network
-* Easy to use - I wanted the backup process to be fully automated and require little effort.
+* Easy to use - I wanted the backup process to be fully automated and require little effort; "starting at the press of a button".
 * Full scope - I wanted the backup process to encompass the complete environment of the average small business, and all of the critical data contained within.
 * Free and secure - I wanted the backup process to utilize native, built-in methods for moving data around the network in order to minimize cost, improve security, and reduce dependencies on third parties.
 * Open source - I wanted the software to be open source, in order to provide transparancy, security, and community involvement.
