@@ -17,8 +17,9 @@ $ExportJob = Export-VM -ComputerName $hypervhost -Name $vm -Path $path -AsJob
 
 while ($ExportJob.State -eq "Running" -or $ExportJob.State -eq "NotStarted")
 {
-	$message = $vm + " export progress: " + $ExportJob.Progress.PercentComplete + "% complete."
-	Write-EventLog -LogName "Exodus Event Log" -Source "Exodus Source" -EventID 625 -EntryType Information -Message $message
+	# log backup progress - REMOVED TO AVOID LOG CLUTTER
+	#$message = $vm + " export progress: " + $ExportJob.Progress.PercentComplete + "% complete."
+	#Write-EventLog -LogName "Exodus Event Log" -Source "Exodus Source" -EventID 625 -EntryType Information -Message $message
 	sleep(60)
 }
 

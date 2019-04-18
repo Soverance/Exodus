@@ -68,6 +68,7 @@ namespace Exodus.HyperV
                     {
                         if (outputItem != null)
                         {
+                            // log account delegate information
                             ExodusRoot.ExodusEventLog.WriteEntry(outputItem.BaseObject.GetType().FullName + "\n" + outputItem.BaseObject.ToString(), EventLogEntryType.Information, 201);
                         }
                     }
@@ -102,21 +103,23 @@ namespace Exodus.HyperV
                 // create the directory for today's backup
                 // this method does nothing if the directory already exists.
                 System.IO.Directory.CreateDirectory(datepath);
-                string message0 = "The backup directory " + datepath + " was created.";
-                ExodusRoot.ExodusEventLog.WriteEntry(message0, EventLogEntryType.Information, 201);
+
+                // log directory creation events - REMOVED TO AVOID LOG CLUTTER
+                //string message0 = "The backup directory " + datepath + " was created.";
+                //ExodusRoot.ExodusEventLog.WriteEntry(message0, EventLogEntryType.Information, 201);  
 
                 // if there are more backup directories than specified
                 if (System.IO.Directory.GetDirectories(@path).Length > retain)
                 {
                     string message1 = System.IO.Directory.GetDirectories(@path).Length.ToString() + " directories were found, which is greater than the retention count specified in ExodusConfig.xml.  Deleting oldest backup directory.";
-                    ExodusRoot.ExodusEventLog.WriteEntry(message1, EventLogEntryType.Information, 201);
+                    ExodusRoot.ExodusEventLog.WriteEntry(message1, EventLogEntryType.Information, 201);  // log retention count information
 
                     // this code gets all the directories in the specified remote path, orders them youngest first, skips the specified retain count, and deletes everything else
                     foreach (var fi in new DirectoryInfo(path).GetDirectories().OrderByDescending(x => x.LastWriteTime).Skip(retain))
                     {
                         fi.Delete(true);  // recursively delete the directory
                         string message2 = fi.FullName + " was deleted.";
-                        ExodusRoot.ExodusEventLog.WriteEntry(message2, EventLogEntryType.Information, 201);
+                        ExodusRoot.ExodusEventLog.WriteEntry(message2, EventLogEntryType.Information, 201);  // log the deletion of a backup directory
                     }
                 }
             }
@@ -146,15 +149,25 @@ namespace Exodus.HyperV
 
                     Collection<PSObject> PSOutput = PowerShellInstance.Invoke();
 
+                    int startCounter = 0;
+                    int endCounter = PSOutput.Count();
+
                     foreach (PSObject outputItem in PSOutput)
                     {
                         if (outputItem != null)
                         {
-                            ExodusRoot.ExodusEventLog.WriteEntry(outputItem.BaseObject.GetType().FullName
-                                + "\n" + outputItem.BaseObject.ToString(), EventLogEntryType.Information, 201);
+                            // log the name and id of the virtual machine - REMOVED TO AVOID LOG CLUTTER
+                            //ExodusRoot.ExodusEventLog.WriteEntry(outputItem.BaseObject.GetType().FullName + "\n" + outputItem.BaseObject.ToString(), EventLogEntryType.Information, 201);
 
                             string vm = outputItem.Members["Name"].Value.ToString();
                             BackupVM(host, vm, path);
+
+                            if (startCounter >= endCounter)
+                            {
+                                startCounter++;  
+                                // log cluster backup completed
+                                ExodusRoot.ExodusEventLog.WriteEntry("Backups for " + endCounter.ToString() + " virtual machines in the Hyper-V cluster were successfully completed.", EventLogEntryType.Information, 201);
+                            }
                         }
                     }
 
@@ -201,7 +214,8 @@ namespace Exodus.HyperV
                     {
                         if (outputItem != null)
                         {
-                            ExodusRoot.ExodusEventLog.WriteEntry(outputItem.BaseObject.GetType().FullName + "\n" + outputItem.BaseObject.ToString(), EventLogEntryType.Information, 201);
+                            // logs virtual machine name and id information - REMOVED TO AVOID LOG CLUTTER
+                            //ExodusRoot.ExodusEventLog.WriteEntry(outputItem.BaseObject.GetType().FullName + "\n" + outputItem.BaseObject.ToString(), EventLogEntryType.Information, 201);
                         }
                     }
 
@@ -245,7 +259,8 @@ namespace Exodus.HyperV
                     {
                         if (outputItem != null)
                         {
-                            ExodusRoot.ExodusEventLog.WriteEntry(outputItem.BaseObject.GetType().FullName + "\n" + outputItem.BaseObject.ToString(), EventLogEntryType.Information, 201);
+                            // logs virtual machine name and id information - REMOVED TO AVOID LOG CLUTTER
+                            //ExodusRoot.ExodusEventLog.WriteEntry(outputItem.BaseObject.GetType().FullName + "\n" + outputItem.BaseObject.ToString(), EventLogEntryType.Information, 201);
                         }
                     }
 
