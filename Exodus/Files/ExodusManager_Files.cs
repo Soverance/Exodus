@@ -47,6 +47,9 @@ namespace Exodus.Files
 
                     if (RoboCopyOutput != null)
                     {
+                        // write robocopy info to the event viewer
+                        // TO DO :  I'm pretty sure this is a problem, where the Robocopy info written to log can occasionally exceed 32766 characters, after which it will throw an error in the Event Viewer
+                        // I need to refactor this code so that it strips this RoboCopyOutput string into something shorter than 32766 characters.
                         ExodusRoot.ExodusEventLog.WriteEntry(RoboCopyOutput, EventLogEntryType.Information, 302);
                     }
 
