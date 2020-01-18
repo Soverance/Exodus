@@ -159,6 +159,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Azure\GoogleDCMtoAzureStorage.cs" />
     <Compile Include="Exodus.cs">
       <SubType>Component</SubType>
     </Compile>
