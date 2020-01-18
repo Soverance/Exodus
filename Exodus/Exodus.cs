@@ -208,7 +208,7 @@ namespace Exodus
                     }
                     catch (Exception ex)
                     {
-                        // write errors to the log
+                        // write errors to the log                        
                         ExodusEventLog.WriteEntry(ex.Message, EventLogEntryType.Error, 177);
                     }
                 }
